@@ -222,6 +222,12 @@ def pegasos_single_step_update(
     completed.
     """
     # Your code here
+    if label * (sum(current_theta * feature_vector) + current_theta_0) <= 1:
+        current_theta = (1 - eta * L) * current_theta + eta * label * feature_vector
+        current_theta_0 = current_theta_0 + eta * label
+    else: 
+        current_theta = (1 - eta * L) * current_theta
+    return (current_theta, current_theta_0)
     raise NotImplementedError
 #pragma: coderesponse end
 
@@ -257,6 +263,17 @@ def pegasos(feature_matrix, labels, T, L):
     parameter, found after T iterations through the feature matrix.
     """
     # Your code here
+    d = np.shape(feature_matrix)[1]
+    theta = np.zeros(d)
+    theta_0 = 0
+    count = 1
+    for t in range(T):
+        for i in get_order(feature_matrix.shape[0]):
+            eta = 1/(count ** 0.5)
+            theta, theta_0 = pegasos_single_step_update(feature_matrix[i], labels[i], L, eta, theta, theta_0)
+            count += 1
+            pass
+    return (theta, theta_0)
     raise NotImplementedError
 #pragma: coderesponse end
 
@@ -282,6 +299,15 @@ def classify(feature_matrix, theta, theta_0):
     be considered a positive classification.
     """
     # Your code here
+    n = np.shape(feature_matrix)[0]
+    d = np.shape(feature_matrix)[1]
+    classified_array = np.array([])
+    for i in range(n):
+        if sum(theta * feature_matrix[i]) + theta_0 > 0.0:
+            classified_array = np.append(classified_array, 1.0)
+        else: 
+            classified_array = np.append(classified_array, -1.0)
+    return classified_array
     raise NotImplementedError
 #pragma: coderesponse end
 
@@ -320,6 +346,8 @@ def classifier_accuracy(
     accuracy of the trained classifier on the validation data.
     """
     # Your code here
+    theta, theta_0 = classifier(train_feature_matrix, train_labels, **kwargs)
+    return (accuracy(classify(train_feature_matrix, theta, theta_0), train_labels), accuracy(classify(val_feature_matrix, theta, theta_0), val_labels))
     raise NotImplementedError
 #pragma: coderesponse end
 
